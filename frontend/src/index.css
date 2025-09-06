@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes marquee {
+  0% {
+    transform: translateX(30%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+body {
+  background-image: url("/background/gray_background.jpg");
+}
+
+.animate-marquee {
+  white-space: nowrap;
+  overflow: hidden;
+  display: inline-block;
+  animation: marquee 32s linear infinite;
+}
+
+@keyframes bgMove {
+  0% {
+    background-position: 0px;
+  }
+  100% {
+    background-position: 1000px;
+  }
+}
+
+.animate-bgMove {
+  animation: bgMove 200s linear infinite;
+}
