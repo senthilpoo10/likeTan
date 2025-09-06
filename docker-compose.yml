@@ -1,0 +1,61 @@
+version: "3.8"
+
+networks:
+  internal_network:
+    name: gangNet
+    driver: bridge
+
+services:
+  backend:
+    build: ./backend
+    image: backend:4.2
+    container_name: backend
+    volumes:
+      - ./backend:/app
+      - /app/node_modules # Avoid overwriting node_modules with host
+      - ./frontend:/frontend
+    ports:
+      - "8080:8080"
+    environment:
+      - NODE_ENV=development
+    restart: always
+    networks:
+      - internal_network
+
+  frontend:
+    build: ./frontend
+    image: frontend:4.2
+    container_name: frontend
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./frontend/.env.docker
+    environment:
+      - NODE_ENV=development
+    restart: always
+    networks:
+      - internal_network
+
+  serveo:
+    build:
+      dockerfile_inline: |
+        FROM alpine:3.20.5
+        RUN apk add openssh
+        COPY serveo.sh /serveo.sh
+        RUN chmod +x /serveo.sh
+        ENTRYPOINT ["/serveo.sh"]
+    image: serveo:4.2
+    container_name: serveo
+    environment:
+      - SERVEO_PRIVATE_KEY=${SERVEO_PRIVATE_KEY}
+      - SERVEO_PUBLIC_KEY=${SERVEO_PUBLIC_KEY}
+    depends_on:
+      - frontend
+    restart: always
+    networks:
+      - internal_network
